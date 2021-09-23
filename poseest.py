@@ -51,6 +51,14 @@ def drawSkeleton(locations, image):
             cv.ellipse(image, locations[idxTo], (3,3), 0, 0, 360, 
                     (0, 0, 255), cv.FILLED)
 
+def addFrameInfo(image, nnet):
+    # Frame information for image
+    t, _ = nnet.getPerfProfile() 
+    freq = cv.getTickFrequency() / 1000
+    cv.putText(image, '%.2fms' % (t / freq), (10, 20), cv.FONT_HERSHEY_SIMPLEX,
+            0.5, (0, 0, 0)) 
+
+
 # Parse command line arguments and store in args
 parser = argparse.ArgumentParser() 
 
@@ -162,10 +170,11 @@ while cv.waitKey(100) < 0:
     #                (0, 0, 255), cv.FILLED)
 
     # Frame information for image
-    t, _ = nnet.getPerfProfile() 
-    freq = cv.getTickFrequency() / 1000
-    cv.putText(image, '%.2fms' % (t / freq), (10, 20), cv.FONT_HERSHEY_SIMPLEX,
-            0.5, (0, 0, 0)) 
+    addFrameInfo(image, nnet)
+    #t, _ = nnet.getPerfProfile() 
+    #freq = cv.getTickFrequency() / 1000
+    #cv.putText(image, '%.2fms' % (t / freq), (10, 20), cv.FONT_HERSHEY_SIMPLEX,
+    #        0.5, (0, 0, 0)) 
 
     # Write image to output given on command line, and display image.
     cv.imwrite(args.output, image) 
