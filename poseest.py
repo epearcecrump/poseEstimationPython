@@ -31,6 +31,25 @@ def findBodyPartPositions(locations, nnoutput, imageW, imageH, outputW, outputH,
         else:
             locations.append(None)
 
+def drawSkeleton(locations, image):
+    for pair in setup.POSE_PAIRS:
+        # Lookup the index in the BODY_PARTS dictionary 
+        idxFrom = setup.BODY_PARTS[pair[0]] 
+        idxTo = setup.BODY_PARTS[pair[1]]
+
+        # Only draw lines between locations that are in the locations array
+        if locations[idxFrom] and locations[idxTo]:
+            # cv.line() params: 
+                # frame, pt1, pt2, Scalar(colour:BGR), thick=1,linetype=8, shift=0)
+            cv.line(image, locations[idxFrom], locations[idxTo], (0, 255, 255), 4)
+
+            # cv.ellipse() params: 
+                # frame, center, axes, angle, startAngle, endAngle, 
+                # colour[, thickness[, linetype[, shift]]]
+            cv.ellipse(image, locations[idxFrom], (3,3), 0, 0, 360, 
+                    (0, 0, 255), cv.FILLED) 
+            cv.ellipse(image, locations[idxTo], (3,3), 0, 0, 360, 
+                    (0, 0, 255), cv.FILLED)
 
 # Parse command line arguments and store in args
 parser = argparse.ArgumentParser() 
@@ -121,24 +140,26 @@ while cv.waitKey(100) < 0:
         #    locations.append(None)
    
     # Draw the skeleton lines for each of the POSE_PAIRS:
-    for pair in setup.POSE_PAIRS:
+    drawSkeleton(locations, image)
+
+    #for pair in setup.POSE_PAIRS:
         # Lookup the index in the BODY_PARTS dictionary 
-        idxFrom = setup.BODY_PARTS[pair[0]] 
-        idxTo = setup.BODY_PARTS[pair[1]]
+    #    idxFrom = setup.BODY_PARTS[pair[0]] 
+    #    idxTo = setup.BODY_PARTS[pair[1]]
 
         # Only draw lines between locations that are in the locations array
-        if locations[idxFrom] and locations[idxTo]:
+    #    if locations[idxFrom] and locations[idxTo]:
             # cv.line() params: 
                 # frame, pt1, pt2, Scalar(colour:BGR), thick=1,linetype=8, shift=0)
-            cv.line(image, locations[idxFrom], locations[idxTo], (0, 255, 255), 4)
+    #        cv.line(image, locations[idxFrom], locations[idxTo], (0, 255, 255), 4)
 
             # cv.ellipse() params: 
                 # frame, center, axes, angle, startAngle, endAngle, 
                 # colour[, thickness[, linetype[, shift]]]
-            cv.ellipse(image, locations[idxFrom], (3,3), 0, 0, 360, 
-                    (0, 0, 255), cv.FILLED) 
-            cv.ellipse(image, locations[idxTo], (3,3), 0, 0, 360, 
-                    (0, 0, 255), cv.FILLED)
+    #        cv.ellipse(image, locations[idxFrom], (3,3), 0, 0, 360, 
+    #                (0, 0, 255), cv.FILLED) 
+    #        cv.ellipse(image, locations[idxTo], (3,3), 0, 0, 360, 
+    #                (0, 0, 255), cv.FILLED)
 
     # Frame information for image
     t, _ = nnet.getPerfProfile() 
