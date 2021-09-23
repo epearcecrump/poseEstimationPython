@@ -10,6 +10,27 @@ def process(image, nnet, width, height):
     nnet.setInput(nninput)
     return nnet.forward()
 
+def findBodyPartPositions(locations, nnoutput, imageW, imageH, outputW, outputH, thresh):
+    for i in range(len(setup.BODY_PARTS)):
+        # Slice heatmap from output for the body part 
+        # first axis is 0 as we input only one image
+        heatMap = nnoutput[0, i, :, :]
+ 
+        # Finds the global minimum and maximum element values and their positions 
+            # (does not work with a multi-channel array) 
+            # (hence only a single pose can be detected this way)
+        minVal, maxVal, minLoc, maxLoc = cv.minMaxLoc(heatMap)
+  
+        # Scale to image size
+        W = (imageW * maxLoc[0]) / outputW
+        H = (imageH * maxLoc[1]) / outputH
+
+        # Add point pair if maxVal is higher than the given threshold
+        if maxVal > thresh:
+            locations.append((int(W), int(H))) 
+        else:
+            locations.append(None)
+
 
 # Parse command line arguments and store in args
 parser = argparse.ArgumentParser() 
@@ -71,28 +92,33 @@ while cv.waitKey(100) < 0:
         # being in location x, y
     #nnoutput = nnet.forward()
     nnoutput = process(image, nnet, args.width, args.height)
+
+    outputW = nnoutput.shape[3]
+    outputH = nnoutput.shape[2]
     
     # Find the locations of the body parts for the input image
     locations = [] 
-    for i in range(len(setup.BODY_PARTS)):
+    findBodyPartPositions(locations, nnoutput, imageW, imageH, outputW, outputH, args.threshold)
+
+    #for i in range(len(setup.BODY_PARTS)):
         # Slice heatmap from output for the body part 
         # first axis is 0 as we input only one image
-        heatMap = nnoutput[0, i, :, :]
+        #heatMap = nnoutput[0, i, :, :]
  
         # Finds the global minimum and maximum element values and their positions 
             # (does not work with a multi-channel array) 
             # (hence only a single pose can be detected this way)
-        minVal, maxVal, minLoc, maxLoc = cv.minMaxLoc(heatMap)
+        #minVal, maxVal, minLoc, maxLoc = cv.minMaxLoc(heatMap)
   
         # Scale to image size
-        W = (imageW * maxLoc[0]) / nnoutput.shape[3] 
-        H = (imageH * maxLoc[1]) / nnoutput.shape[2]
+        #W = (imageW * maxLoc[0]) / nnoutput.shape[3] 
+        #H = (imageH * maxLoc[1]) / nnoutput.shape[2]
 
         # Add point pair if maxVal is higher than the given threshold
-        if maxVal > args.threshold: 
-            locations.append((int(W), int(H))) 
-        else:
-            locations.append(None)
+        #if maxVal > args.threshold: 
+        #    locations.append((int(W), int(H))) 
+        #else:
+        #    locations.append(None)
    
     # Draw the skeleton lines for each of the POSE_PAIRS:
     for pair in setup.POSE_PAIRS:
