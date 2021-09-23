@@ -4,6 +4,13 @@ import argparse                     # Argument Parser from Command Line
 import posesetup as setup           # Contains Body Parts dictionary and Pose Pairs 
                                     # (for drawing lines)
 
+def process(image, nnet, width, height):
+    nninput = cv.dnn.blobFromImage(image, 1.0, (width, height), 
+                (0, 0, 0), swapRB=False, crop=False) 
+    nnet.setInput(nninput)
+    return nnet.forward()
+
+
 # Parse command line arguments and store in args
 parser = argparse.ArgumentParser() 
 
@@ -13,6 +20,8 @@ parser.add_argument('--output', default='out.jpg',
     help='Output path to save image/video. Leave blank to use frames from camera.')
 parser.add_argument('--threshold', default=0.2, type=float,
     help='Threshold value for the heat map') 
+parser.add_argument('--video', 
+    help='Option to indicate a video has been input.') 
 parser.add_argument('--width', default=368, type=int, 
     help='Resize input to specific width')
 parser.add_argument('--height', default=368, type=int, 
@@ -53,14 +62,15 @@ while cv.waitKey(100) < 0:
         # mean: scalar with mean values which are subtracted from channels 
         # swapRB: True means swap BGR to RGB; False by default
         # crop: indicates whether image will be cropped after resize or not
-    nninput = cv.dnn.blobFromImage(image, 1.0, (args.width, args.height), 
-                (0, 0, 0), swapRB=False, crop=False) 
-    nnet.setInput(nninput)
+    #nninput = cv.dnn.blobFromImage(image, 1.0, (args.width, args.height), 
+    #            (0, 0, 0), swapRB=False, crop=False) 
+    #nnet.setInput(nninput)
 
     # Obtain a 4-dimensional Mat object 
         # an array of "heatmaps", the probability of a body part 
         # being in location x, y
-    nnoutput = nnet.forward()
+    #nnoutput = nnet.forward()
+    nnoutput = process(image, nnet, args.width, args.height)
     
     # Find the locations of the body parts for the input image
     locations = [] 
